@@ -8,7 +8,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
@@ -26,12 +28,17 @@ public class CustomerService {
     }
 
 
-    public void startProcess(int quantity) {
-        IntStream.range(0, quantity)
-                .forEach(item -> customerProducer.produce(Customer.builder()
+    public List<Customer> generateCustomer(int quantity) {
+        return IntStream.range(0, quantity)
+                .mapToObj(value -> Customer.builder()
                         .id(UUID.randomUUID().toString())
-                        .birthDate(LocalDate.now().minusDays(item))
+                        .birthDate(LocalDate.now().minusDays(value))
                         .name(RandomStringUtils.randomAlphanumeric(10))
-                .build()));
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public void startProcess(int quantity) {
+        generateCustomer(quantity).forEach(customerProducer::produce);
     }
 }
